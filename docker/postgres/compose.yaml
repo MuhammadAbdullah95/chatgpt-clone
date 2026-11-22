@@ -1,0 +1,25 @@
+# PostgreSQL 18 with the pgvector extension available (used from Phase 8).
+# Extensions and tables are created by Alembic migrations, not init scripts,
+# so every database (local, CI, tests) gets them the same way.
+services:
+  postgres:
+    image: pgvector/pgvector:pg18
+    container_name: chatgpt-postgres
+    env_file: # POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+      - path: ../.env.example # defaults, so it works before setup
+      - path: ../.env # your local values override them
+        required: false
+    ports:
+      - "127.0.0.1:5432:5432" # this machine only, not the network
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

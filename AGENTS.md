@@ -8,7 +8,7 @@ This file is the single source of truth. Tool-specific files (like `CLAUDE.md`) 
 
 A ChatGPT clone: a chat app where the user sends a message and gets an AI reply.
 
-**Status:** Phase 0 (foundation) of the [roadmap](docs/roadmap.md) in progress. Stack: [ADR-0001](docs/adr/0001-tech-stack.md).
+**Status:** Phase 0 (foundation) done. Next: Phase 1 (streaming chat) of the [roadmap](docs/roadmap.md). Stack: [ADR-0001](docs/adr/0001-tech-stack.md).
 
 ## Your role
 
@@ -136,12 +136,12 @@ Feature-based on both sides: a feature has the same name in `apps/web/src/featur
 │           ├── features/       # One folder per feature: chat, conversations, auth, ...
 │           ├── components/ui/  # shadcn/ui building blocks
 │           └── lib/            # Auth config, generated API client
-├── docker/                     # One folder per service (postgres, redis, api, web) (planned, Phase 0)
+├── docker/                     # One folder per service (postgres, redis, api, web); see docker/README.md
 ├── docs/                       # adr/, research/, roadmap.md, security.md
 ├── .claude/                    # Claude Code permission guardrails
 ├── .githooks/                  # Git hooks for every tool: protect main, block secrets
-├── .github/                    # PR template; CI and Dependabot (planned, Phase 0)
-├── Makefile                    # All common commands (planned, Phase 0)
+├── .github/                    # CI, Dependabot, PR template
+├── Makefile                    # All common commands (`make help`)
 ├── .editorconfig               # Shared editor formatting
 ├── AGENTS.md                   # Shared rules for all agents (this file)
 ├── CLAUDE.md                   # Loads AGENTS.md for Claude Code
@@ -163,17 +163,19 @@ Docker rules: each service's folder holds everything about that service (compose
 
 ## Commands
 
-After cloning, turn on the git hooks once:
+Run everything from the repo root with `make` (`make help` lists all commands):
 
-```sh
-git config core.hooksPath .githooks
-```
+| Command | What it does |
+|---|---|
+| `make setup` | First-time setup: git hooks, env files, dependencies |
+| `make infra` | Start Postgres and Redis in Docker |
+| `make dev` | Run API (:8000) and web (:3000) on this machine with hot reload |
+| `make up` / `make down` | Start / stop everything in Docker |
+| `make ps`, `make logs s=<service>` | Container health and logs |
+| `make lint`, `make test`, `make check` | Quality checks (`check` = what CI runs, plus the web build) |
 
-Each app lists its own commands in its README (`apps/api/README.md`, `apps/web/README.md`). A root `Makefile` will wrap them.
+Each app's own commands are in its README (`apps/api/README.md`, `apps/web/README.md`). Docker details: `docker/README.md`.
 
-Before opening a PR, run the checks for every app you touched:
-
-- API (in `apps/api`): `uv run ruff check . && uv run ruff format --check . && uv run pytest`
-- Web (in `apps/web`): `pnpm lint && pnpm typecheck && pnpm build`
+Before opening a PR, run `make check`. CI runs the same checks on every PR: API (Ruff, pytest, pip-audit), Web (Biome, TypeScript, build, pnpm audit), and Docker (image builds).
 
 When working on Next.js code, read the guides bundled in `apps/web/node_modules/next/dist/docs/` first (see `apps/web/AGENTS.md`).

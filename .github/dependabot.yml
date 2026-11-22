@@ -1,0 +1,42 @@
+# Weekly dependency updates. Each ecosystem's updates come grouped in one PR.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /apps/api
+    schedule:
+      interval: weekly
+    groups:
+      api:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+    groups:
+      web:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories: ["/docker/api", "/docker/web"]
+    schedule:
+      interval: weekly
+    groups:
+      dockerfiles:
+        patterns: ["*"]
+
+  - package-ecosystem: docker-compose
+    directories: ["/docker/postgres", "/docker/redis"]
+    schedule:
+      interval: weekly
+    groups:
+      compose-images:
+        patterns: ["*"]

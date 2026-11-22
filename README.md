@@ -2,19 +2,32 @@
 
 A chat app where the user sends a message and gets an AI reply.
 
-**Status:** Tech stack decided: Next.js + FastAPI + OpenAI ([ADR-0001](docs/adr/0001-tech-stack.md)). Building starts with Phase 0 of the [roadmap](docs/roadmap.md).
+**Status:** Phase 0 (foundation) done. Next: Phase 1, streaming chat. See the [roadmap](docs/roadmap.md) and the stack in [ADR-0001](docs/adr/0001-tech-stack.md).
 
-## Setup after cloning
+## Requirements
 
-Turn on the project's git hooks (they protect `main` and block secrets):
+Docker, Node.js 24+, pnpm, uv, and make.
+
+## Quick start
 
 ```sh
-git config core.hooksPath .githooks
+make setup    # git hooks, env files, dependencies
+make infra    # Postgres + Redis in Docker
+make dev      # API on http://localhost:8000, web on http://localhost:3000
 ```
+
+Or run everything in Docker: `make up` (stop with `make down`). `make help` lists all commands.
+
+## Project layout
+
+- `apps/api`: FastAPI backend ([README](apps/api/README.md))
+- `apps/web`: Next.js frontend ([README](apps/web/README.md))
+- `docker/`: one folder per service ([README](docker/README.md))
+- `docs/`: decisions, research, roadmap, and security plan
 
 ## How we work
 
-- `main` is protected. All work happens on a branch and reaches `main` through a reviewed pull request.
+- `main` is protected. All work happens on a branch and reaches `main` through a reviewed pull request, with CI passing.
 - Full workflow and rules: [`AGENTS.md`](./AGENTS.md).
 
 ## For AI agents
