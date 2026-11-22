@@ -59,6 +59,11 @@ Agent rules:
 - Never merge a PR unless the user explicitly says so.
 - Never force push, rewrite shared history, or use `--no-verify`.
 
+Authorship (every agent and tool):
+
+- Commits, PR titles, PR descriptions, and PR or review comments are written in the user's name, **Muhammad Abdullah**.
+- Never add AI attribution: no `Co-Authored-By` trailers for an AI, no "Generated with ..." lines, no session links, and no mention of Claude or any other AI tool as an author.
+
 ## AI agent guardrails
 
 - **Stay in scope.** Change only what the task needs. No drive-by refactors, renames, or reformatting.
