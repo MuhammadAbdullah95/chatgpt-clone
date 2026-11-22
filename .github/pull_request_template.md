@@ -18,6 +18,13 @@
 - [ ] `AGENTS.md` / docs updated if the stack, structure, or commands changed
 - [ ] AI-generated code was read and understood by a human
 
+## Security (see `docs/security.md`)
+
+- [ ] Data access is scoped to the current user (ownership checked)
+- [ ] User input is validated and size-limited
+- [ ] Model output is rendered safely (no raw HTML)
+- [ ] `/security-review` run, if this touches auth, files, sharing, or tools
+
 ## AI assistance
 
 <!-- Which parts were written with an AI agent? Anything the reviewer should double-check? -->

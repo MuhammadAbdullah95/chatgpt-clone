@@ -2,7 +2,7 @@
 
 A chat app where the user sends a message and gets an AI reply.
 
-**Status:** Repo setup done. Tech stack not decided yet.
+**Status:** Tech stack decided: Next.js + FastAPI + OpenAI ([ADR-0001](docs/adr/0001-tech-stack.md)). Building starts with Phase 0 of the [roadmap](docs/roadmap.md).
 
 ## Setup after cloning
 
