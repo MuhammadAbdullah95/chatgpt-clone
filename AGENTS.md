@@ -8,7 +8,7 @@ This file is the single source of truth. Tool-specific files (like `CLAUDE.md`) 
 
 A ChatGPT clone: a chat app where the user sends a message and gets an AI reply.
 
-**Status:** Tech stack decided ([ADR-0001](docs/adr/0001-tech-stack.md)). No app code yet. Next: Phase 0 of the [roadmap](docs/roadmap.md).
+**Status:** Phase 0 (foundation) of the [roadmap](docs/roadmap.md) in progress. Stack: [ADR-0001](docs/adr/0001-tech-stack.md).
 
 ## Your role
 
@@ -113,23 +113,48 @@ Plans: [roadmap](docs/roadmap.md) and [security plan](docs/security.md).
 
 ## Project structure
 
+Feature-based on both sides: a feature has the same name in `apps/web/src/features/` and `apps/api/src/app/features/`.
+
 ```
 .
-├── .claude/settings.json             # Claude Code permission guardrails
-├── .githooks/                        # Git hooks for every tool: protect main, block secrets
-├── .github/pull_request_template.md  # PR checklist
-├── docs/
-│   ├── adr/                          # Architecture Decision Records, one file per decision
-│   ├── research/                     # Research reports and notes
-│   ├── roadmap.md                    # Build phases
-│   └── security.md                   # Security plan
-├── .editorconfig                     # Shared editor formatting (indent, line endings)
-├── AGENTS.md                         # Shared rules for all agents (this file)
-├── CLAUDE.md                         # Loads AGENTS.md for Claude Code
+├── apps/
+│   ├── api/                    # FastAPI backend (Python, uv)
+│   │   ├── src/app/
+│   │   │   ├── main.py         # Creates the app, mounts every feature's router
+│   │   │   ├── core/           # Shared plumbing: config, db, redis, security, llm, errors, logging
+│   │   │   └── features/       # One folder per feature: health, conversations, chat, ...
+│   │   ├── migrations/         # Alembic database migrations (Phase 1)
+│   │   └── tests/              # features/ mirrors src/app/features/; security/ for cross-feature checks
+│   └── web/                    # Next.js frontend (TypeScript 7) (Phase 0)
+│       └── src/
+│           ├── app/            # Routes only, kept thin
+│           ├── features/       # One folder per feature: chat, conversations, auth, ...
+│           ├── components/ui/  # shadcn/ui building blocks
+│           └── lib/            # Auth config, generated API client
+├── docker/                     # One folder per service (postgres, redis, api, web) (planned, Phase 0)
+├── docs/                       # adr/, research/, roadmap.md, security.md
+├── .claude/                    # Claude Code permission guardrails
+├── .githooks/                  # Git hooks for every tool: protect main, block secrets
+├── .github/                    # PR template; CI and Dependabot (planned, Phase 0)
+├── Makefile                    # All common commands (planned, Phase 0)
+├── .editorconfig               # Shared editor formatting
+├── AGENTS.md                   # Shared rules for all agents (this file)
+├── CLAUDE.md                   # Loads AGENTS.md for Claude Code
 └── README.md
 ```
 
-App folders will be added once the stack is decided.
+Backend feature rules:
+
+1. Every feature with logic or data follows the same pattern: `router.py` (HTTP only) → `service.py` (logic) → `repository.py` (database). Add `models.py` and `schemas.py` when needed. A feature with no logic and no data (like `health`) can be just a `router.py`.
+2. Features talk to each other only through `service.py`, never through another feature's repository or models.
+3. `core/` never imports from `features/`.
+4. Only `core/llm.py` creates the OpenAI client. Each feature keeps its own prompts (e.g. `chat/agent.py`).
+5. Every repository query is filtered by the current user's `user_id`.
+6. A new feature is a new folder, in both apps when it has UI.
+
+Frontend rules: routes in `app/` stay thin and import from `features/`. Each feature folder holds its own `components/`, `hooks/`, `api.ts`, and `types.ts`.
+
+Docker rules: each service's folder holds everything about that service (compose file, Dockerfile, config). `docker/compose.yaml` only lists them with `include`.
 
 ## Commands
 
@@ -139,4 +164,8 @@ After cloning, turn on the git hooks once:
 git config core.hooksPath .githooks
 ```
 
-App commands (install, dev, build, test) will go here once the stack is chosen.
+Each app lists its own commands in its README (`apps/api/README.md`, `apps/web/README.md`). A root `Makefile` will wrap them.
+
+Before opening a PR, run the checks for every app you touched:
+
+- API (in `apps/api`): `uv run ruff check . && uv run ruff format --check . && uv run pytest`
