@@ -8,7 +8,7 @@ This file is the single source of truth. Tool-specific files (like `CLAUDE.md`) 
 
 A ChatGPT clone: a chat app where the user sends a message and gets an AI reply.
 
-**Status:** Repo setup done (rules, guardrails, GitHub). Tech stack not decided yet, no app code.
+**Status:** Tech stack decided ([ADR-0001](docs/adr/0001-tech-stack.md)). No app code yet. Next: Phase 0 of the [roadmap](docs/roadmap.md).
 
 ## Your role
 
@@ -99,7 +99,17 @@ Rules for the app itself, since it calls an LLM:
 
 ## Tech stack
 
-_Not decided yet._ This is the first decision. Record it as `docs/adr/0001-tech-stack.md`.
+Decided in [ADR-0001](docs/adr/0001-tech-stack.md). Read it before changing anything structural.
+
+- **Frontend:** Next.js (App Router) + TypeScript 7 + Tailwind CSS + shadcn/ui + Vercel AI SDK UI
+- **Backend:** Python + FastAPI (async) + Pydantic AI, managed with uv
+- **LLM provider:** OpenAI, through the model gateway
+- **Data:** PostgreSQL (SQLAlchemy 2 + Alembic), Redis
+- **Auth:** Better Auth in Next.js; FastAPI verifies its JWTs
+
+Design rules to keep: messages are stored as a tree; reply generation is decoupled from the browser connection (Redis Stream buffer, resumable); the OpenAI key never reaches the browser.
+
+Plans: [roadmap](docs/roadmap.md) and [security plan](docs/security.md).
 
 ## Project structure
 
@@ -108,7 +118,11 @@ _Not decided yet._ This is the first decision. Record it as `docs/adr/0001-tech-
 ├── .claude/settings.json             # Claude Code permission guardrails
 ├── .githooks/                        # Git hooks for every tool: protect main, block secrets
 ├── .github/pull_request_template.md  # PR checklist
-├── docs/adr/                         # Architecture Decision Records, one file per decision
+├── docs/
+│   ├── adr/                          # Architecture Decision Records, one file per decision
+│   ├── research/                     # Research reports and notes
+│   ├── roadmap.md                    # Build phases
+│   └── security.md                   # Security plan
 ├── .editorconfig                     # Shared editor formatting (indent, line endings)
 ├── AGENTS.md                         # Shared rules for all agents (this file)
 ├── CLAUDE.md                         # Loads AGENTS.md for Claude Code
