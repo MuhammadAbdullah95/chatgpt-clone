@@ -1,0 +1,27 @@
+# Web container, built from apps/web with docker/web/Dockerfile.
+# Starts only with the "apps" profile (`make up`). For daily work, run the web
+# app on your machine instead (`make dev`).
+services:
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: ../../docker/web/Dockerfile # path is relative to the context
+    image: chatgpt-clone/web
+    container_name: chatgpt-web
+    profiles: ["apps"]
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

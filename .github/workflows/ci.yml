@@ -1,0 +1,82 @@
+# Runs on every pull request and every push to main.
+# Actions are pinned to commit SHAs (supply-chain safety); Dependabot updates them.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Cancel outdated PR runs only; every commit on main gets a full run.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          working-directory: apps/api
+          enable-cache: true
+          cache-dependency-glob: apps/api/uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check .
+      - name: Format check
+        run: uv run ruff format --check .
+      - name: Tests
+        run: uv run pytest
+      - name: Audit dependencies
+        run: |
+          uv export --format requirements-txt --no-dev --no-emit-project --locked > "$RUNNER_TEMP/requirements.txt"
+          uvx pip-audit==2.10.1 --disable-pip --require-hashes -r "$RUNNER_TEMP/requirements.txt"
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          package_json_file: apps/web/package.json
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint and format check
+        run: pnpm exec biome ci .
+      - name: Type check
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
+      - name: Audit dependencies
+        run: pnpm audit --prod --audit-level high
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate compose files
+        run: docker compose -f docker/compose.yaml --profile apps config --quiet
+      - name: Build images
+        run: docker compose -f docker/compose.yaml --profile apps build

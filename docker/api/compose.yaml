@@ -1,0 +1,36 @@
+# API container, built from apps/api with docker/api/Dockerfile.
+# Starts only with the "apps" profile (`make up`). For daily work, run the API
+# on your machine instead (`make dev`).
+services:
+  api:
+    build:
+      context: ../../apps/api
+      dockerfile: ../../docker/api/Dockerfile # path is relative to the context
+    image: chatgpt-clone/api
+    container_name: chatgpt-api
+    profiles: ["apps"]
+    env_file:
+      - path: ../.env.example # defaults, so it works before setup
+      - path: ../.env # your local values override them
+        required: false
+    environment:
+      ENVIRONMENT: production
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped

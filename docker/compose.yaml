@@ -1,0 +1,9 @@
+# Entry point for every Docker service. Each service lives in its own folder.
+# Use the Makefile: `make infra` (Postgres + Redis) or `make up` (everything).
+name: chatgpt-clone
+
+include:
+  - postgres/compose.yaml
+  - redis/compose.yaml
+  - api/compose.yaml
+  - web/compose.yaml
