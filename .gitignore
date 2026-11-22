@@ -26,3 +26,7 @@ Thumbs.db
 # Personal AI agent settings (not shared)
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Generated TypeScript / Next.js files
+*.tsbuildinfo
+next-env.d.ts

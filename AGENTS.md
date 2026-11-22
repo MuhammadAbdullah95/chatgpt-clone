@@ -101,7 +101,7 @@ Rules for the app itself, since it calls an LLM:
 
 Decided in [ADR-0001](docs/adr/0001-tech-stack.md). Read it before changing anything structural.
 
-- **Frontend:** Next.js (App Router) + TypeScript 7 + Tailwind CSS + shadcn/ui + Vercel AI SDK UI
+- **Frontend:** Next.js (App Router) + TypeScript 7 + Tailwind CSS + shadcn/ui (Radix) + Vercel AI SDK UI; Biome for lint and format (not ESLint, see ADR-0001)
 - **Backend:** Python + FastAPI (async) + Pydantic AI, managed with uv
 - **LLM provider:** OpenAI, through the model gateway
 - **Data:** PostgreSQL (SQLAlchemy 2 + Alembic), Redis
@@ -125,7 +125,7 @@ Feature-based on both sides: a feature has the same name in `apps/web/src/featur
 │   │   │   └── features/       # One folder per feature: health, conversations, chat, ...
 │   │   ├── migrations/         # Alembic database migrations (Phase 1)
 │   │   └── tests/              # features/ mirrors src/app/features/; security/ for cross-feature checks
-│   └── web/                    # Next.js frontend (TypeScript 7) (Phase 0)
+│   └── web/                    # Next.js frontend (TypeScript 7)
 │       └── src/
 │           ├── app/            # Routes only, kept thin
 │           ├── features/       # One folder per feature: chat, conversations, auth, ...
@@ -169,3 +169,6 @@ Each app lists its own commands in its README (`apps/api/README.md`, `apps/web/R
 Before opening a PR, run the checks for every app you touched:
 
 - API (in `apps/api`): `uv run ruff check . && uv run ruff format --check . && uv run pytest`
+- Web (in `apps/web`): `pnpm lint && pnpm typecheck && pnpm build`
+
+When working on Next.js code, read the guides bundled in `apps/web/node_modules/next/dist/docs/` first (see `apps/web/AGENTS.md`).
