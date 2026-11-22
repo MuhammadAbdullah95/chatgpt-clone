@@ -1,0 +1,33 @@
+#!/bin/sh
+# Runs before every commit, from any tool (terminal, VS Code, Cursor, AI agents).
+# 1. Blocks commits directly on main.
+# 2. Blocks committing .env files or common API keys.
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# The very first commit is allowed so the repo can be bootstrapped.
+if [ "$branch" = "main" ] && git rev-parse --verify --quiet HEAD >/dev/null; then
+  echo "Blocked: direct commits to 'main' are not allowed."
+  echo "Create a branch first:  git switch -c feat/<short-name>"
+  exit 1
+fi
+
+# Only .env.example may be committed.
+env_files=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '(^|/)\.env(\.[^/]+)?$' \
+  | grep -vE '\.env\.example$')
+if [ -n "$env_files" ]; then
+  echo "Blocked: these files may contain secrets and must not be committed:"
+  echo "$env_files"
+  exit 1
+fi
+
+# OpenAI/Anthropic (sk-...), Google (AIza...), GitHub (ghp_...), AWS (AKIA...).
+key_pattern='(sk-[A-Za-z0-9_-]{20,}|AIza[0-9A-Za-z_-]{35}|gh[pousr]_[A-Za-z0-9]{36}|AKIA[0-9A-Z]{16})'
+if git diff --cached -U0 --diff-filter=ACMR | grep -E '^\+' | grep -qE "$key_pattern"; then
+  echo "Blocked: an API key or token was found in the staged changes."
+  echo "Put it in a .env file and read it from the environment instead."
+  exit 1
+fi
+
+exit 0

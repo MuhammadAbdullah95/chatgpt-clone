@@ -1,0 +1,16 @@
+#!/bin/sh
+# Runs before every push. Blocks any push that updates 'main':
+# changes reach main only by merging a pull request on GitHub.
+# Creating 'main' on a new, empty remote (the first push) is allowed.
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    # remote_sha is all zeros when main doesn't exist on the remote yet.
+    if [ -n "$(printf '%s' "$remote_sha" | tr -d '0')" ]; then
+      echo "Blocked: pushing to 'main' is not allowed. Open a pull request instead."
+      exit 1
+    fi
+  fi
+done
+
+exit 0
