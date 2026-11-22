@@ -19,4 +19,4 @@ cp .env.example .env    # then fill in values
 | Lint | `uv run ruff check .` |
 | Format | `uv run ruff format .` |
 
-The dev server runs on http://localhost:8000. Interactive API docs: http://localhost:8000/docs (disabled in production).
+The dev server runs on http://localhost:8000. Interactive API docs: http://localhost:8000/docs, only when `ENVIRONMENT=development` (the default is `production`, which hides them).

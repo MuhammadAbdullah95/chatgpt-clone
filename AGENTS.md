@@ -125,18 +125,18 @@ Feature-based on both sides: a feature has the same name in `apps/web/src/featur
 │   │   │   └── features/       # One folder per feature: health, conversations, chat, ...
 │   │   ├── migrations/         # Alembic database migrations (Phase 1)
 │   │   └── tests/              # features/ mirrors src/app/features/; security/ for cross-feature checks
-│   └── web/                    # Next.js frontend (TypeScript 7)
+│   └── web/                    # Next.js frontend (TypeScript 7) (Phase 0)
 │       └── src/
 │           ├── app/            # Routes only, kept thin
 │           ├── features/       # One folder per feature: chat, conversations, auth, ...
 │           ├── components/ui/  # shadcn/ui building blocks
 │           └── lib/            # Auth config, generated API client
-├── docker/                     # One folder per service (postgres, redis, api, web)
+├── docker/                     # One folder per service (postgres, redis, api, web) (planned, Phase 0)
 ├── docs/                       # adr/, research/, roadmap.md, security.md
 ├── .claude/                    # Claude Code permission guardrails
 ├── .githooks/                  # Git hooks for every tool: protect main, block secrets
-├── .github/                    # CI, Dependabot, PR template
-├── Makefile                    # All common commands
+├── .github/                    # PR template; CI and Dependabot (planned, Phase 0)
+├── Makefile                    # All common commands (planned, Phase 0)
 ├── .editorconfig               # Shared editor formatting
 ├── AGENTS.md                   # Shared rules for all agents (this file)
 ├── CLAUDE.md                   # Loads AGENTS.md for Claude Code
@@ -145,7 +145,7 @@ Feature-based on both sides: a feature has the same name in `apps/web/src/featur
 
 Backend feature rules:
 
-1. Every feature follows the same pattern: `router.py` (HTTP only) → `service.py` (logic) → `repository.py` (database). Add `models.py` and `schemas.py` when needed.
+1. Every feature with logic or data follows the same pattern: `router.py` (HTTP only) → `service.py` (logic) → `repository.py` (database). Add `models.py` and `schemas.py` when needed. A feature with no logic and no data (like `health`) can be just a `router.py`.
 2. Features talk to each other only through `service.py`, never through another feature's repository or models.
 3. `core/` never imports from `features/`.
 4. Only `core/llm.py` creates the OpenAI client. Each feature keeps its own prompts (e.g. `chat/agent.py`).
