@@ -33,7 +33,7 @@ Option 1.
 | Auth | Better Auth in Next.js (email + Google); FastAPI verifies Better Auth JWTs through its JWKS endpoint |
 | File storage | Local disk behind a storage interface; S3-compatible storage when deploying |
 | Local run | Docker Compose (PostgreSQL, Redis) + pnpm + uv |
-| Quality | Ruff, pytest, ESLint, Vitest, Playwright, GitHub Actions CI |
+| Quality | Ruff, pytest, Biome (lint + format), Vitest, Playwright, GitHub Actions CI |
 
 ### Design rules that come with this decision
 
@@ -50,5 +50,5 @@ Option 1.
 
 - **Easier:** Python AI libraries; a documented streaming protocol on both ends; resumable streams from day one; switching model or provider is a config change.
 - **Harder:** two apps and two env files; auth is split (Better Auth issues tokens, FastAPI verifies them); Redis is required even locally.
-- **TypeScript 7** has no JavaScript API until 7.1. `next build` type-checks with the `tsc` CLI (the default since Next.js 16.4). Type-aware ESLint rules wait for TypeScript 7.1.
+- **TypeScript 7** has no JavaScript API until 7.1. `next build` type-checks with the `tsc` CLI (the default since Next.js 16.4). ESLint's TypeScript parser needs that API, so the frontend uses **Biome** for linting and formatting instead of ESLint (updated 2026-11-22 during Phase 0).
 - **Revisit later:** background job runner (in-process tasks first, a worker queue when needed); object storage when deploying.
