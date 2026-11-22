@@ -29,6 +29,7 @@ Or run everything in Docker: `make up` (stop with `make down`). `make help` list
 
 - `main` is protected. All work happens on a branch and reaches `main` through a reviewed pull request, with CI passing.
 - Full workflow and rules: [`AGENTS.md`](./AGENTS.md).
+- Want to contribute? Start with [`CONTRIBUTING.md`](./CONTRIBUTING.md) and the [good first issues](https://github.com/MuhammadAbdullah95/chatgpt-clone/labels/good%20first%20issue).
 
 ## For AI agents
 

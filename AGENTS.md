@@ -61,7 +61,7 @@ Agent rules:
 
 Authorship (every agent and tool):
 
-- Commits, PR titles, PR descriptions, and PR or review comments are written in the user's name, **Muhammad Abdullah**.
+- Commits, PR titles, PR descriptions, and PR or review comments belong to the human you work for: the maintainer, **Muhammad Abdullah**, or the contributor whose work it is. Never write as anyone else.
 - Never add AI attribution: no `Co-Authored-By` trailers for an AI, no "Generated with ..." lines, no session links, and no mention of Claude or any other AI tool as an author.
 
 ## AI agent guardrails
