@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest a new feature or an improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What should it do?
+      description: Describe the feature from the user's point of view.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful?
+    validations:
+      required: true
+  - type: textarea
+    id: how
+    attributes:
+      label: How could we build it?
+      description: A rough idea is fine. Which parts change (api, web, docker)?
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I checked docs/roadmap.md and the open issues, and this is not already planned.
+          required: true

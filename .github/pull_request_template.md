@@ -1,5 +1,7 @@
 ## What
 
+Closes #<!-- issue number -->
+
 <!-- What does this PR change? 1-3 lines. -->
 
 ## Why
