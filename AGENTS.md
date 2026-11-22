@@ -172,10 +172,12 @@ Run everything from the repo root with `make` (`make help` lists all commands):
 | `make dev` | Run API (:8000) and web (:3000) on this machine with hot reload |
 | `make up` / `make down` | Start / stop everything in Docker |
 | `make ps`, `make logs s=<service>` | Container health and logs |
-| `make lint`, `make test`, `make check` | Quality checks (`check` = what CI runs, plus the web build) |
+| `make lint`, `make test`, `make audit` | Lint and type checks, tests, dependency audit |
+| `make check` | CI's API and Web checks: lint, test, audit, web build |
+| `make images` | CI's Docker check: validate compose files, build images |
 
 Each app's own commands are in its README (`apps/api/README.md`, `apps/web/README.md`). Docker details: `docker/README.md`.
 
-Before opening a PR, run `make check`. CI runs the same checks on every PR: API (Ruff, pytest, pip-audit), Web (Biome, TypeScript, build, pnpm audit), and Docker (image builds).
+Before opening a PR, run `make check`, plus `make images` if you changed anything under `docker/` or a dependency. CI runs all of these on every PR: API (Ruff, pytest, pip-audit), Web (Biome, TypeScript, build, pnpm audit), and Docker (compose validation, image builds).
 
 When working on Next.js code, read the guides bundled in `apps/web/node_modules/next/dist/docs/` first (see `apps/web/AGENTS.md`).

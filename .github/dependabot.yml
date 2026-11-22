@@ -29,6 +29,12 @@ updates:
     directories: ["/docker/api", "/docker/web"]
     schedule:
       interval: weekly
+    # Runtime versions are a project decision (Node 24 LTS, Python 3.14), not a routine update.
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       dockerfiles:
         patterns: ["*"]

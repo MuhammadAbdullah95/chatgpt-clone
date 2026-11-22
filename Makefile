@@ -6,7 +6,10 @@ s ?=
 
 .DEFAULT_GOAL := help
 .PHONY: help setup infra up down ps logs restart db-shell redis-shell \
-        dev dev-api dev-web test lint check
+        dev dev-api dev-web test lint audit images check
+
+# Keep in sync with .github/workflows/ci.yml
+PIP_AUDIT := pip-audit==2.10.1
 
 help: ## List all commands
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -63,9 +66,20 @@ dev-web: ## Run only the web app (http://localhost:3000)
 test: ## Run all tests
 	cd apps/api && uv run pytest
 
-lint: ## Lint, format-check, and type-check both apps
+lint: ## Lint, format-check, and type-check both apps (same as CI)
 	cd apps/api && uv run ruff check . && uv run ruff format --check .
-	cd apps/web && pnpm lint && pnpm typecheck
+	cd apps/web && pnpm exec biome ci . && pnpm typecheck
 
-check: lint test ## Everything CI checks, plus the web build
+audit: ## Check dependencies for known vulnerabilities (same as CI)
+	cd apps/api && f=$$(mktemp) && \
+		uv export --format requirements-txt --no-dev --no-emit-project --locked > "$$f" && \
+		uvx $(PIP_AUDIT) --disable-pip --require-hashes -r "$$f"; \
+		status=$$?; rm -f "$$f"; exit $$status
+	cd apps/web && pnpm audit --prod --audit-level high
+
+images: ## Build the Docker images (CI's Docker job)
+	$(COMPOSE) --profile apps config --quiet
+	$(COMPOSE) --profile apps build
+
+check: lint test audit ## CI's API and Web checks, plus the web build
 	cd apps/web && pnpm build
