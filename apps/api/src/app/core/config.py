@@ -4,6 +4,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Any, Literal
+from urllib.parse import urlsplit
 
 from pydantic import AfterValidator, BeforeValidator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -23,14 +24,37 @@ def _parse_origins(value: Any) -> Any:
 
 
 def _check_origins(origins: list[str]) -> list[str]:
-    """Allow only exact http(s) origins. A wildcard plus cookies would let any site in."""
+    """Allow only valid, exact HTTP(S) origins."""
     checked = []
+
     for origin in origins:
         if "*" in origin:
             raise ValueError("CORS_ORIGINS must list exact origins; '*' is not allowed")
-        if not origin.startswith(("http://", "https://")):
-            raise ValueError(f"CORS origin must start with http:// or https://: {origin!r}")
-        checked.append(origin.rstrip("/"))
+
+        if origin != origin.strip() or any(char.isspace() for char in origin):
+            raise ValueError(f"CORS origin must not contain whitespace: {origin!r}")
+
+        try:
+            parsed = urlsplit(origin)
+            hostname = parsed.hostname
+            port = parsed.port
+        except ValueError as exc:
+            raise ValueError(f"Invalid CORS origin: {origin!r}") from exc
+
+        if parsed.scheme not in ("http", "https") or not parsed.netloc or not hostname:
+            raise ValueError(f"CORS origin must have a valid HTTP(S) hostname: {origin!r}")
+
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError(f"CORS origin must not contain credentials: {origin!r}")
+
+        if parsed.path not in ("", "/") or "?" in origin or "#" in origin:
+            raise ValueError(f"CORS origin must not contain a path, query, or fragment: {origin!r}")
+
+        if parsed.netloc.endswith(":") or (port is not None and port == 0):
+            raise ValueError(f"CORS origin has an invalid port: {origin!r}")
+
+        checked.append(origin[:-1] if parsed.path == "/" else origin)
+
     return checked
 
 

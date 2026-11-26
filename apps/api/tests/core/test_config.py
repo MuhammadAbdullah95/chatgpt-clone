@@ -25,7 +25,23 @@ def test_cors_origins_accepts_a_json_list(monkeypatch: pytest.MonkeyPatch) -> No
     assert Settings(_env_file=None).cors_origins == ["http://localhost:3000"]
 
 
-@pytest.mark.parametrize("origin", ["*", "https://*.example.com", "localhost:3000"])
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "*",
+        "https://*.example.com",
+        "localhost:3000",
+        "https://example.com/path",
+        "https://example.com:99999",
+        "https://",
+        "http://example.com evil",
+        "https://user:pass@example.com",
+        "https://example.com?query=1",
+        "https://example.com#fragment",
+        "https://example.com?",
+        "https://example.com#",
+    ],
+)
 def test_cors_origins_rejects_unsafe_values(monkeypatch: pytest.MonkeyPatch, origin: str) -> None:
     monkeypatch.setenv("CORS_ORIGINS", origin)
 
